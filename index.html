@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>심플 링크 매니저</title>
+    <!-- Tailwind CSS CDN 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter 폰트 설정 -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f1f5f9; /* Slate-100 */
+        }
+        /* Hidden by default, shown by JS router */
+        .page-view { display: none; }
+
+        /* Public Page Background Style */
+        .public-page-bg {
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container" class="app-container">
+
+        <!-- 1. LOGIN / SIGNUP VIEW (#login) -->
+        <div id="login-view" class="page-view w-full max-w-md p-6 sm:p-8 bg-white shadow-xl rounded-2xl">
+            <h2 id="auth-title" class="text-3xl font-extrabold text-center text-gray-900 mb-6">로그인</h2>
+
+            <div class="space-y-4">
+                <input id="auth-email" type="email" placeholder="이메일 주소" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+                <input id="auth-password" type="password" placeholder="비밀번호" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+                <button onclick="handleAuth(true)" class="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition duration-200 shadow-md">로그인</button>
+            </div>
+
+            <div class="mt-6 text-center">
+                <button id="toggle-auth" onclick="toggleAuthMode()" class="text-sm text-blue-600 hover:text-blue-800 transition duration-150">계정이 없으신가요? 회원가입</button>
+            </div>
+
+            <div class="relative my-8">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500" id="l10n-or-social">또는 소셜 계정으로</span>
+                </div>
+            </div>
+
+            <div class="flex justify-center space-x-4">
+                <!-- Social Login Buttons (Simulation) -->
+                <button onclick="socialLogin('Google')" class="p-3 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition duration-200" title="Google">
+                    <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.18 3.31v2.77h3.57c2.08-1.92 3.3-4.78 3.3-8.15z" fill="#4285F4"/><path d="M12 23c3.27 0 6.04-1.07 8.05-2.92l-3.57-2.77c-.98.67-2.24 1.05-3.69 1.05-2.81 0-5.2-1.87-6.09-4.39H2.56v2.85C4.63 20.89 8.01 23 12 23z" fill="#34A853"/><path d="M5.91 14.15c-.17-.5-.27-1.02-.27-1.57s.1-1.07.27-1.57V8.16H2.56c-.56 1.09-.88 2.36-.88 3.68s.32 2.59.88 3.68l3.35-2.85z" fill="#FBBC04"/><path d="M12 5.03c1.77 0 3.38.61 4.65 1.83l3.12-3.12C18.04 1.91 15.27.75 12 .75 8.01.75 4.63 2.89 2.56 6.16l3.35 2.85C6.79 6.9 9.18 5.03 12 5.03z" fill="#EA4335"/></svg>
+                </button>
+                <button onclick="socialLogin('YouTube')" class="p-3 bg-red-700 text-white rounded-full shadow-lg hover:bg-red-800 transition duration-200" title="YouTube">
+                    <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M10 15.5l6-3.5-6-3.5zM20 7.27S20 5 19 4s-2.27-.99-3.5-.99c-3.63-.12-9-.12-12 0-1.23 0-2.5 0-3.5.99S4 5 4 7.27v7.46C4 16 4 17 5 18s2.27.99 3.5.99c3.63.12 9 .12 12 0 1.23 0 2.5 0 3.5-.99s1-2.27 1-3.5V7.27z"/></svg>
+                </button>
+                <button onclick="socialLogin('Facebook')" class="p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition duration-200" title="Facebook">
+                    <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M12 2.163c-.361 0-4.067-.008-7.399 2.223C1.29 6.643.088 11.238.088 12c0 4.982 4.04 9 9 9h6c4.982 0 9-4.04 9-9 0-.762-.122-5.357-4.513-7.614C16.067 2.155 12.361 2.163 12 2.163zm-4 12c-1.104 0-2-.896-2-2s.896-2 2-2 2 .896 2 2-.896 2-2 2zm8 0c-1.104 0-2-.896-2-2s.896-2 2-2 2 .896 2 2-.896 2-2 2z"/></svg>
+                </button>
+                <button onclick="socialLogin('Instagram')" class="p-3 bg-pink-500 text-white rounded-full shadow-lg hover:bg-pink-600 transition duration-200" title="Instagram">
+                    <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm5 10c0 1.104-.896 2-2 2h-6c-1.104 0-2-.896-2-2s.896-2 2-2h6c1.104 0 2 .896 2 2zM9 9c0 .553-.447 1-1 1s-1-.447-1-1 .447-1 1-1 1 .447 1 1z"/></svg>
+                </button>
+            </div>
+            <div id="auth-message" class="mt-4 text-center text-red-500 font-medium"></div>
+        </div>
+
+        <!-- 2. DASHBOARD VIEW (#dashboard) -->
+        <div id="dashboard-view" class="page-view w-full p-4 sm:p-8">
+            <div class="max-w-4xl mx-auto space-y-8">
+                <!-- Header & Language Selector -->
+                <div class="flex justify-between items-center border-b pb-4">
+                    <h1 id="l10n-dashboard-title" class="text-3xl font-bold">대시보드</h1>
+                    <div class="flex items-center space-x-4">
+                        <select id="lang-selector" onchange="setLanguage(this.value)" class="p-2 border rounded-lg">
+                            <option value="ko">한국어</option>
+                            <option value="en">English</option>
+                        </select>
+                        <button onclick="logout()" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200" id="l10n-logout">로그아웃</button>
+                    </div>
+                </div>
+
+                <!-- Profile Card -->
+                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-6">
+                    <img id="profile-pic" class="w-16 h-16 rounded-full object-cover border-4 border-blue-500" src="https://placehold.co/64x64/3B82F6/FFFFFF?text=P" alt="Profile">
+                    <div>
+                        <p id="profile-name" class="text-xl font-semibold text-gray-800">사용자 이름</p>
+                        <p id="profile-email" class="text-gray-500">user@example.com</p>
+                        <p id="profile-social" class="text-sm text-blue-500 font-medium mt-1">로그인 소셜: Google</p>
+                    </div>
+                    <button onclick="openProfileModal()" class="ml-auto p-2 bg-gray-100 rounded-full hover:bg-gray-200" id="l10n-edit-profile" title="프로필 수정">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+                </div>
+                
+                <!-- Profile Edit Modal -->
+                <div id="profile-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white p-6 rounded-xl w-full max-w-sm">
+                        <h3 class="text-xl font-bold mb-4" id="l10n-edit-profile-modal">프로필 수정</h3>
+                        <input id="modal-name" type="text" placeholder="이름" class="w-full mb-3 p-2 border rounded-lg">
+                        <input id="modal-email" type="email" placeholder="이메일" class="w-full mb-3 p-2 border rounded-lg">
+                        <div class="flex justify-end space-x-2">
+                            <button onclick="closeProfileModal()" class="px-4 py-2 bg-gray-200 rounded-lg" id="l10n-cancel">취소</button>
+                            <button onclick="saveProfile()" class="px-4 py-2 bg-blue-600 text-white rounded-lg" id="l10n-save">저장</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Management -->
+                <div class="flex justify-between items-center">
+                    <h2 id="l10n-your-pages" class="text-2xl font-semibold">내 링크 페이지 관리</h2>
+                    <button id="add-page-btn" onclick="openPageModal()" class="px-4 py-2 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition duration-200">
+                        <span id="l10n-add-page">새 페이지 추가</span>
+                    </button>
+                </div>
+
+                <!-- Page Add Modal -->
+                <div id="page-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white p-6 rounded-xl w-full max-w-lg">
+                        <h3 class="text-xl font-bold mb-4" id="l10n-new-page-modal">새 페이지 만들기</h3>
+                        <input id="new-page-name" type="text" placeholder="페이지 이름 (예: portfolio)" class="w-full mb-3 p-3 border rounded-lg" oninput="validatePageName(this.value)">
+                        <p id="page-name-error" class="text-sm text-red-500 mb-3 hidden" id="l10n-name-conflict">페이지 이름이 중복되거나 유효하지 않습니다.</p>
+                        <textarea id="new-page-description" placeholder="홍보용 긴 페이지 설명" rows="4" class="w-full mb-3 p-3 border rounded-lg"></textarea>
+                        <div class="flex justify-end space-x-2">
+                            <button onclick="closePageModal()" class="px-4 py-2 bg-gray-200 rounded-lg" id="l10n-cancel-2">취소</button>
+                            <button id="create-page-btn-modal" onclick="addPage()" class="px-4 py-2 bg-green-600 text-white rounded-lg disabled:opacity-50" disabled id="l10n-create">생성</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page List -->
+                <div id="page-list" class="space-y-4">
+                    <!-- Page Cards will be injected here by renderDashboard() -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. EDITOR VIEW (#editor) -->
+        <div id="editor-view" class="page-view w-full flex flex-col lg:flex-row p-4 sm:p-8">
+            <div class="lg:w-1/3 p-4 bg-white rounded-xl shadow-lg lg:sticky lg:top-4 h-full lg:h-screen-75 overflow-y-auto mb-6 lg:mb-0">
+                <div class="flex justify-between items-center border-b pb-4 mb-4">
+                    <h2 id="editor-page-name" class="text-2xl font-bold text-gray-800">페이지 편집</h2>
+                    <button onclick="window.location.hash = '#dashboard'" class="text-blue-600 hover:text-blue-800" id="l10n-back-dashboard">대시보드로 돌아가기</button>
+                </div>
+
+                <!-- Tabs: Links vs Design -->
+                <div class="flex mb-4">
+                    <button id="tab-links" onclick="showEditorTab('links')" class="flex-1 p-3 font-semibold border-b-2 border-blue-600 text-blue-600" id="l10n-links-tab">링크 관리</button>
+                    <button id="tab-design" onclick="showEditorTab('design')" class="flex-1 p-3 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700" id="l10n-design-tab">디자인</button>
+                </div>
+
+                <!-- 3a. Links Management Tab -->
+                <div id="links-tab-content">
+                    <h3 class="text-xl font-semibold mb-3" id="l10n-page-image-title">페이지 대표 이미지</h3>
+                    <div class="mb-4 space-y-2 p-3 border rounded-lg bg-gray-50">
+                        <img id="page-profile-preview" class="w-16 h-16 rounded-full object-cover mx-auto mb-2 border border-gray-300" src="https://placehold.co/64x64/CCCCCC/333333?text=Page" alt="Page Profile">
+                        <input id="page-profile-url" type="url" oninput="updatePageProfileUrl(this.value)" placeholder="대표 이미지 URL (옵션)" class="w-full p-2 border rounded-lg text-sm">
+                        <label for="page-profile-file" class="block font-medium mt-2 text-sm" id="l10n-upload-image">이미지 업로드</label>
+                        <input id="page-profile-file" type="file" onchange="uploadPageProfileImage(event)" accept="image/*" class="w-full text-sm border-0">
+                    </div>
+
+                    <h3 class="text-xl font-semibold mb-3" id="l10n-add-new-link">새 링크 추가</h3>
+                    
+                    <!-- Social Link Buttons -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button onclick="showLinkModal('YouTube')" class="p-2 bg-red-600 text-white rounded-lg text-sm hover:opacity-80">YouTube</button>
+                        <button onclick="showLinkModal('Instagram')" class="p-2 bg-pink-600 text-white rounded-lg text-sm hover:opacity-80">Instagram</button>
+                        <button onclick="showLinkModal('Facebook')" class="p-2 bg-blue-700 text-white rounded-lg text-sm hover:opacity-80">Facebook</button>
+                        <button onclick="showLinkModal('X')" class="p-2 bg-gray-800 text-white rounded-lg text-sm hover:opacity-80">X (Twitter)</button>
+                        <button onclick="showLinkModal('Custom')" class="p-2 bg-green-600 text-white rounded-lg text-sm hover:opacity-80" id="l10n-custom-link">직접 추가</button>
+                    </div>
+
+                    <!-- Link List -->
+                    <div id="editor-link-list" class="space-y-3 pt-4 border-t">
+                        <!-- Links will be injected here -->
+                    </div>
+                </div>
+
+                <!-- 3b. Design Tab -->
+                <div id="design-tab-content" class="hidden">
+                    <h3 class="text-xl font-semibold mb-4" id="l10n-customize-page">페이지 커스터마이징</h3>
+                    
+                    <div class="space-y-4">
+                        <label class="block font-medium" id="l10n-background-color">배경 색상:</label>
+                        <input type="color" id="design-bg-color" oninput="updatePageDesign()" class="w-full h-10 rounded-lg border-none p-0 cursor-pointer">
+                        
+                        <label class="block font-medium mt-4" id="l10n-background-image-url">배경 이미지 URL:</label>
+                        <input type="url" id="design-bg-image" oninput="updatePageDesign()" placeholder="배경 이미지 URL (컬러보다 우선)" class="w-full p-2 border rounded-lg">
+
+                        <label class="block font-medium mt-4" id="l10n-font-style">폰트 스타일:</label>
+                        <select id="design-font-family" onchange="updatePageDesign()" class="w-full p-2 border rounded-lg">
+                            <option value="Inter">Inter (기본)</option>
+                            <option value="'Noto Sans KR', sans-serif">Noto Sans KR</option>
+                            <option value="Georgia, serif">Georgia (세리프)</option>
+                            <option value="'Courier New', monospace">Courier New (모노)</option>
+                        </select>
+                    </div>
+
+                    <h3 class="text-lg font-semibold mt-6 mb-3" id="l10n-page-desc-title">페이지 설명 수정</h3>
+                    <textarea id="editor-page-description" oninput="saveDescription()" rows="3" class="w-full p-2 border rounded-lg focus:ring-blue-500"></textarea>
+                </div>
+            </div>
+
+            <!-- 4. EDITOR PREVIEW (Public Page Simulation) -->
+            <div class="lg:w-2/3 lg:pl-8">
+                <h2 class="text-2xl font-bold mb-4 lg:hidden" id="l10n-mobile-preview">미리보기 (모바일)</h2>
+                <div id="public-page-preview" class="mx-auto w-full max-w-sm h-[80vh] overflow-y-auto bg-white shadow-2xl rounded-[3rem] border-8 border-gray-800 p-6 relative public-page-bg">
+                    <!-- Public Page content will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Link Add/Edit Modal -->
+            <div id="link-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div class="bg-white p-6 rounded-xl w-full max-w-lg">
+                    <h3 class="text-xl font-bold mb-4" id="link-modal-title">새 링크 추가</h3>
+                    
+                    <!-- Link Style Selection -->
+                    <div class="mb-4">
+                        <label class="block font-medium mb-2" id="l10n-select-style">링크 표시 스타일 선택:</label>
+                        <div class="flex space-x-2">
+                            <button data-style="bar" onclick="selectLinkStyle('bar')" class="style-btn px-3 py-2 border-2 border-blue-500 bg-blue-100 rounded-lg text-sm" id="l10n-style-bar">바(Bar)형</button>
+                            <button data-style="square" onclick="selectLinkStyle('square')" class="style-btn px-3 py-2 border-2 border-gray-300 rounded-lg text-sm" id="l10n-style-square">1:1 박스형</button>
+                            <button data-style="wide" onclick="selectLinkStyle('wide')" class="style-btn px-3 py-2 border-2 border-gray-300 rounded-lg text-sm" id="l10n-style-wide">16:9 박스형</button>
+                        </div>
+                        <input type="hidden" id="link-style" value="bar">
+                    </div>
+
+                    <div class="space-y-3">
+                        <input id="link-url" type="url" placeholder="웹사이트 주소 (URL)" class="w-full p-3 border rounded-lg" onblur="simulateLinkScraping(this.value)">
+                        <input id="link-description" type="text" placeholder="링크 설명" class="w-full p-3 border rounded-lg">
+                        <input id="link-image-url" type="url" placeholder="옵션: 이미지 주소 (URL)" class="w-full p-3 border rounded-lg">
+                        <label for="link-image-file" class="block font-medium mt-2" id="l10n-optional-image">옵션: 이미지 업로드 (파일 선택)</label>
+                        <input id="link-image-file" type="file" accept="image/*" class="w-full p-3 border rounded-lg">
+                    </div>
+
+                    <div id="link-preview-box" class="mt-4 p-3 border rounded-lg bg-gray-50 hidden">
+                        <p class="font-semibold" id="l10n-sim-preview">실시간 미리보기 시뮬레이션:</p>
+                        <img id="sim-image" class="w-16 h-16 object-cover rounded mt-2" src="" alt="Simulated Preview Image">
+                        <p id="sim-title" class="text-sm mt-1"></p>
+                    </div>
+
+                    <div class="flex justify-end space-x-2 mt-4">
+                        <button onclick="closeLinkModal()" class="px-4 py-2 bg-gray-200 rounded-lg" id="l10n-cancel-3">취소</button>
+                        <button onclick="saveLink()" class="px-4 py-2 bg-blue-600 text-white rounded-lg" id="l10n-save-link">링크 저장</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. PUBLIC VIEW (#public) -->
+        <div id="public-view" class="page-view w-full p-4 sm:p-8 flex items-start justify-center">
+            <!-- Public view content, used for direct URL access, is rendered similarly to the editor preview but full screen -->
+            <div id="public-view-content" class="w-full max-w-xl p-6 rounded-2xl shadow-xl space-y-4">
+                <h1 id="public-page-name" class="text-3xl font-bold text-center"></h1>
+                <p id="public-page-description" class="text-center text-gray-600 mb-6"></p>
+                <div id="public-link-list" class="space-y-4">
+                    <!-- Public links will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Core Logic -->
+    <script>
+        // ==================================================================================================
+        // 1. GLOBAL SETUP & LOCALIZATION (L10N)
+        // ==================================================================================================
+        
+        // 다국어 텍스트 데이터 (한국어, 영어)
+        const L10N = {
+            ko: {
+                // Auth
+                'auth-title': '로그인',
+                'toggle-auth-login': '계정이 없으신가요? 회원가입',
+                'toggle-auth-signup': '이미 계정이 있으신가요? 로그인',
+                'l10n-or-social': '또는 소셜 계정으로',
+                'l10n-auth-login': '로그인',
+                'l10n-auth-signup': '회원가입',
+                'l10n-required-fields': '모든 필드를 채워주세요.',
+                // Dashboard
+                'l10n-dashboard-title': '대시보드',
+                'l10n-logout': '로그아웃',
+                'l10n-edit-profile': '프로필 수정',
+                'l10n-edit-profile-modal': '프로필 수정',
+                'l10n-cancel': '취소',
+                'l10n-save': '저장',
+                'l10n-your-pages': '내 링크 페이지 관리',
+                'l10n-add-page': '새 페이지 추가',
+                'l10n-new-page-modal': '새 페이지 만들기',
+                'l10n-name-conflict': '페이지 이름이 중복되거나 유효하지 않습니다.',
+                'l10n-create': '생성',
+                'l10n-edit': '편집',
+                'l10n-delete': '삭제',
+                'l10n-view-public': '공개 주소 보기',
+                'l10n-page-limit-reached': '무료 사용자는 최대 3개의 페이지까지만 만들 수 있습니다.',
+                'l10n-upgrade': '업그레이드 (유료)',
+                // Editor
+                'l10n-back-dashboard': '대시보드로 돌아가기',
+                'l10n-links-tab': '링크 관리',
+                'l10n-design-tab': '디자인',
+                'l10n-add-new-link': '새 링크 추가',
+                'l10n-custom-link': '직접 추가',
+                'l10n-mobile-preview': '미리보기 (모바일)',
+                'l10n-customize-page': '페이지 커스터마이징',
+                'l10n-background-color': '배경 색상:',
+                'l10n-background-image-url': '배경 이미지 URL:',
+                'l10n-font-style': '폰트 스타일:',
+                'l10n-page-desc-title': '페이지 설명 수정',
+                'l10n-select-style': '링크 표시 스타일 선택:',
+                'l10n-style-bar': '바(Bar)형',
+                'l10n-style-square': '1:1 박스형',
+                'l10n-style-wide': '16:9 박스형',
+                'l10n-sim-preview': '실시간 미리보기 시뮬레이션:',
+                'l10n-save-link': '링크 저장',
+                'l10n-link-limit-reached': '무료 사용자는 한 페이지에 최대 10개의 링크까지만 추가할 수 있습니다.',
+                'l10n-optional-image': '옵션: 이미지 업로드 (파일 선택)',
+                'l10n-delete-link-confirm': '정말로 이 링크를 삭제하시겠습니까?',
+                'l10n-delete-page-confirm': '정말로 이 페이지를 삭제하시겠습니까? 페이지 내의 모든 링크가 삭제됩니다.',
+                'l10n-page-image-title': '페이지 대표 이미지',
+                'l10n-upload-image': '이미지 업로드',
+            },
+            en: {
+                // Auth
+                'auth-title': 'Login',
+                'toggle-auth-login': 'Don\'t have an account? Sign Up',
+                'toggle-auth-signup': 'Already have an account? Log In',
+                'l10n-or-social': 'Or sign in with social',
+                'l10n-auth-login': 'Login',
+                'l10n-auth-signup': 'Sign Up',
+                'l10n-required-fields': 'Please fill in all fields.',
+                // Dashboard
+                'l10n-dashboard-title': 'Dashboard',
+                'l10n-logout': 'Logout',
+                'l10n-edit-profile': 'Edit Profile',
+                'l10n-edit-profile-modal': 'Edit Profile',
+                'l10n-cancel': 'Cancel',
+                'l10n-save': 'Save',
+                'l10n-your-pages': 'Manage Your Link Pages',
+                'l10n-add-page': 'Add New Page',
+                'l10n-new-page-modal': 'Create New Page',
+                'l10n-name-conflict': 'Page name is duplicate or invalid.',
+                'l10n-create': 'Create',
+                'l10n-edit': 'Edit',
+                'l10n-delete': 'Delete',
+                'l10n-view-public': 'View Public URL',
+                'l10n-page-limit-reached': 'Free users can only create up to 3 pages.',
+                'l10n-upgrade': 'Upgrade (Paid)',
+                // Editor
+                'l10n-back-dashboard': 'Back to Dashboard',
+                'l10n-links-tab': 'Links Management',
+                'l10n-design-tab': 'Design',
+                'l10n-add-new-link': 'Add New Link',
+                'l10n-custom-link': 'Add Custom Link',
+                'l10n-mobile-preview': 'Preview (Mobile)',
+                'l10n-customize-page': 'Customize Page',
+                'l10n-background-color': 'Background Color:',
+                'l10n-background-image-url': 'Background Image URL:',
+                'l10n-font-style': 'Font Style:',
+                'l10n-page-desc-title': 'Edit Page Description',
+                'l10n-select-style': 'Select Link Display Style:',
+                'l10n-style-bar': 'Bar Style',
+                'l10n-style-square': '1:1 Box Style',
+                'l10n-style-wide': '16:9 Box Style',
+                'l10n-sim-preview': 'Real-time Preview Simulation:',
+                'l10n-save-link': 'Save Link',
+                'l10n-link-limit-reached': 'Free users can only add up to 10 links per page.',
+                'l10n-optional-image': 'Optional: Image Upload (File Select)',
+                'l10n-delete-link-confirm': 'Are you sure you want to delete this link?',
+                'l10n-delete-page-confirm': 'Are you sure you want to delete this page? All links will be lost.',
+                'l10n-page-image-title': 'Page Profile Image',
+                'l10n-upload-image': 'Upload Image',
+            }
+        };
+
+        let currentLang = 'ko';
+        let currentAuthMode = 'login'; // 'login' or 'signup'
+        let currentPageId = null;
+        let isEditingLink = false;
+        let editingLinkId = null;
+
+        // 언어 설정 및 UI 업데이트
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('lang-selector').value = lang;
+            document.querySelectorAll('[id^="l10n-"]').forEach(el => {
+                const key = el.id.replace('l10n-', '');
+                if (L10N[currentLang][key]) {
+                    el.textContent = L10N[currentLang][key];
+                }
+            });
+            // Update auth title and toggle button explicitly
+            document.getElementById('auth-title').textContent = L10N[currentLang]['auth-title'];
+            document.getElementById('toggle-auth').textContent = L10N[currentLang][currentAuthMode === 'login' ? 'toggle-auth-login' : 'toggle-auth-signup'];
+            document.getElementById('auth-title').textContent = L10N[currentLang][currentAuthMode === 'login' ? 'l10n-auth-login' : 'l10n-auth-signup'];
+            
+            renderDashboard(); // Re-render dashboard for localized text
+            renderEditor(currentPageId); // Re-render editor if active
+            renderPublicView(); // Re-render public view if active
+        }
+
+        // ==================================================================================================
+        // 2. DATA MANAGEMENT (localStorage Simulation)
+        // ==================================================================================================
+
+        function getData() {
+            const defaultData = {
+                currentUser: null, // { isLoggedIn: false, tier: 'free', name: '', email: '', social: '', profilePic: '' }
+                pages: [],
+                users: {} // Simple user store for login simulation
+            };
+            try {
+                const storedData = localStorage.getItem('linkManagerData');
+                return storedData ? JSON.parse(storedData) : defaultData;
+            } catch (e) {
+                console.error("Error reading data from localStorage", e);
+                return defaultData;
+            }
+        }
+
+        function saveData(data) {
+            try {
+                localStorage.setItem('linkManagerData', JSON.stringify(data));
+            } catch (e) {
+                console.error("Error writing data to localStorage", e);
+            }
+        }
+
+        // ==================================================================================================
+        // 3. AUTHENTICATION & ROUTING
+        // ==================================================================================================
+
+        function getQueryParams(hash) {
+            const query = hash.split('?')[1];
+            if (!query) return {};
+            return query.split('&').reduce((params, param) => {
+                const [key, value] = param.split('=');
+                params[key] = value ? decodeURIComponent(value) : '';
+                return params;
+            }, {});
+        }
+
+        // 라우팅 처리 (해시 기반)
+        function route() {
+            const data = getData();
+            const hash = window.location.hash.slice(1);
+            let view = 'login';
+            let params = {};
+
+            if (hash.includes('?')) {
+                view = hash.split('?')[0];
+                params = getQueryParams(hash);
+            } else {
+                view = hash || 'login';
+            }
+
+            // 인증 체크 및 뷰 전환
+            const isLoggedIn = data.currentUser && data.currentUser.isLoggedIn;
+
+            if (!isLoggedIn && view !== 'login' && !view.startsWith('public')) {
+                window.location.hash = '#login';
+                return;
+            }
+
+            document.querySelectorAll('.page-view').forEach(v => v.style.display = 'none');
+
+            switch (view) {
+                case 'login':
+                    document.getElementById('login-view').style.display = 'flex';
+                    // Ensure auth mode is correctly localized on view load
+                    toggleAuthMode(currentAuthMode === 'signup'); 
+                    document.getElementById('auth-message').textContent = '';
+                    break;
+                case 'dashboard':
+                    document.getElementById('dashboard-view').style.display = 'block';
+                    renderDashboard(data.currentUser);
+                    break;
+                case 'editor':
+                    currentPageId = params.pageId;
+                    if (currentPageId) {
+                        document.getElementById('editor-view').style.display = 'flex';
+                        renderEditor(currentPageId);
+                    } else {
+                        window.location.hash = '#dashboard';
+                    }
+                    break;
+                case 'public':
+                    document.getElementById('public-view').style.display = 'flex';
+                    renderPublicView(params.slug);
+                    break;
+                default:
+                    if (isLoggedIn) {
+                        window.location.hash = '#dashboard';
+                    } else {
+                        window.location.hash = '#login';
+                    }
+                    break;
+            }
+        }
+
+        // 로그인/회원가입 모드 전환
+        function toggleAuthMode(toSignup = false) {
+            currentAuthMode = toSignup ? 'signup' : 'login';
+            document.getElementById('auth-title').textContent = L10N[currentLang][currentAuthMode === 'login' ? 'l10n-auth-login' : 'l10n-auth-signup'];
+            document.getElementById('toggle-auth').textContent = L10N[currentLang][currentAuthMode === 'login' ? 'toggle-auth-login' : 'toggle-auth-signup'];
+            document.getElementById('auth-message').textContent = '';
+        }
+
+        // 이메일/비밀번호 인증 시뮬레이션
+        function handleAuth(isLogin) {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const msgEl = document.getElementById('auth-message');
+            msgEl.textContent = '';
+
+            if (!email || !password) {
+                msgEl.textContent = L10N[currentLang]['l10n-required-fields'];
+                return;
+            }
+
+            let data = getData();
+            const existingUser = data.users[email];
+            
+            if (isLogin) {
+                if (existingUser && existingUser.password === password) {
+                    data.currentUser = { ...existingUser, isLoggedIn: true, lang: currentLang };
+                    saveData(data);
+                    window.location.hash = '#dashboard';
+                } else {
+                    msgEl.textContent = "로그인 실패: 이메일 또는 비밀번호가 틀립니다.";
+                }
+            } else { // Signup
+                if (existingUser) {
+                    msgEl.textContent = "회원가입 실패: 이미 존재하는 이메일입니다.";
+                } else {
+                    const newUser = {
+                        tier: 'free',
+                        name: email.split('@')[0],
+                        email: email,
+                        password: password,
+                        social: 'Email/Password',
+                        profilePic: 'https://placehold.co/64x64/3B82F6/FFFFFF?text=E'
+                    };
+                    data.users[email] = newUser;
+                    data.currentUser = { ...newUser, isLoggedIn: true, lang: currentLang };
+                    saveData(data);
+                    window.location.hash = '#dashboard';
+                }
+            }
+        }
+
+        // 소셜 로그인 시뮬레이션
+        function socialLogin(socialName) {
+            let data = getData();
+            const email = `${socialName.toLowerCase()}@example.com`;
+            const profilePicUrl = {
+                'Google': 'https://placehold.co/64x64/4285F4/FFFFFF?text=G',
+                'YouTube': 'https://placehold.co/64x64/FF0000/FFFFFF?text=YT',
+                'Facebook': 'https://placehold.co/64x64/1877F2/FFFFFF?text=FB',
+                'Instagram': 'https://placehold.co/64x64/E4405F/FFFFFF?text=IG',
+            }[socialName];
+
+            const newUser = {
+                tier: 'free',
+                name: `${socialName} User`,
+                email: email,
+                password: 'social-auth',
+                social: socialName,
+                profilePic: profilePicUrl
+            };
+
+            // Sign up or log in
+            if (!data.users[email]) {
+                data.users[email] = newUser;
+            }
+            
+            data.currentUser = { ...data.users[email], isLoggedIn: true, lang: currentLang, social: socialName, profilePic: profilePicUrl };
+            saveData(data);
+            window.location.hash = '#dashboard';
+        }
+
+        // 로그아웃
+        function logout() {
+            let data = getData();
+            if (data.currentUser) {
+                data.currentUser.isLoggedIn = false;
+            }
+            saveData(data);
+            window.location.hash = '#login';
+        }
+
+        // ==================================================================================================
+        // 4. DASHBOARD LOGIC
+        // ==================================================================================================
+
+        // 프로필 모달
+        function openProfileModal() {
+            const data = getData();
+            document.getElementById('modal-name').value = data.currentUser.name;
+            document.getElementById('modal-email').value = data.currentUser.email;
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        }
+
+        function saveProfile() {
+            const newName = document.getElementById('modal-name').value;
+            const newEmail = document.getElementById('modal-email').value;
+
+            let data = getData();
+            const oldEmail = data.currentUser.email;
+
+            if (newEmail !== oldEmail && data.users[newEmail]) {
+                alert("새 이메일은 이미 사용 중입니다.");
+                return;
+            }
+            
+            // Update current user
+            data.currentUser.name = newName;
+            data.currentUser.email = newEmail;
+            
+            // Update in the users list (simulating a DB change)
+            delete data.users[oldEmail];
+            data.users[newEmail] = { ...data.currentUser, password: data.currentUser.password };
+            
+            saveData(data);
+            renderDashboard(data.currentUser);
+            closeProfileModal();
+        }
+
+        // 대시보드 렌더링
+        function renderDashboard(currentUser) {
+            const data = getData();
+            const user = currentUser || data.currentUser;
+            if (!user) return;
+            
+            // 1. Set language
+            // REMOVED: setLanguage(user.lang || 'ko'); // 무한 재귀 호출 방지
+
+            // 2. Profile Update
+            document.getElementById('profile-pic').src = user.profilePic;
+            document.getElementById('profile-name').textContent = user.name;
+            document.getElementById('profile-email').textContent = user.email;
+            document.getElementById('profile-social').textContent = `${L10N[currentLang]['l10n-auth-login']}: ${user.social}`;
+
+            // 3. Page List Update
+            const pageListEl = document.getElementById('page-list');
+            pageListEl.innerHTML = '';
+            
+            const pages = data.pages;
+            const isFreeTier = user.tier === 'free';
+            const pageLimitReached = isFreeTier && pages.length >= 3;
+
+            pages.forEach(page => {
+                const pageCard = `
+                    <div class="bg-white p-5 rounded-xl shadow flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                        <div>
+                            <p class="text-lg font-semibold text-gray-800">${page.name}</p>
+                            <p class="text-sm text-gray-500 truncate max-w-xs">${page.description || '설명 없음'}</p>
+                        </div>
+                        <div class="flex flex-wrap space-x-2 mt-3 sm:mt-0">
+                            <button onclick="window.location.hash='#editor?pageId=${page.id}'" class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-200">${L10N[currentLang]['l10n-edit']}</button>
+                            <button onclick="window.location.hash='#public?slug=${page.slug}'" class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200">${L10N[currentLang]['l10n-view-public']}</button>
+                            <button onclick="deletePage('${page.id}')" class="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-sm font-medium hover:bg-red-200">${L10N[currentLang]['l10n-delete']}</button>
+                        </div>
+                    </div>
+                `;
+                pageListEl.innerHTML += pageCard;
+            });
+
+            // 4. Handle Page Limit
+            const addPageBtn = document.getElementById('add-page-btn');
+            if (pageLimitReached) {
+                addPageBtn.disabled = true;
+                addPageBtn.textContent = `${L10N[currentLang]['l10n-add-page']} (${pages.length}/3)`;
+                addPageBtn.classList.replace('bg-green-600', 'bg-gray-400');
+                
+                // Add upgrade button placeholder
+                if (!document.getElementById('upgrade-placeholder')) {
+                     const upgradeEl = document.createElement('p');
+                     upgradeEl.id = 'upgrade-placeholder';
+                     upgradeEl.className = 'text-center text-red-500 font-medium mt-4 p-3 bg-red-50 rounded-lg';
+                     upgradeEl.innerHTML = `${L10N[currentLang]['l10n-page-limit-reached']} <button class="underline ml-2">${L10N[currentLang]['l10n-upgrade']}</button>`;
+                     pageListEl.insertAdjacentElement('afterend', upgradeEl);
+                }
+            } else {
+                addPageBtn.disabled = false;
+                addPageBtn.textContent = L10N[currentLang]['l10n-add-page'];
+                addPageBtn.classList.replace('bg-gray-400', 'bg-green-600');
+                const upgradeEl = document.getElementById('upgrade-placeholder');
+                if (upgradeEl) upgradeEl.remove();
+            }
+        }
+
+        // 페이지 추가 모달
+        function openPageModal() {
+            document.getElementById('new-page-name').value = '';
+            document.getElementById('new-page-description').value = '';
+            document.getElementById('page-name-error').classList.add('hidden');
+            document.getElementById('create-page-btn-modal').disabled = true;
+            document.getElementById('page-modal').classList.remove('hidden');
+        }
+
+        function closePageModal() {
+            document.getElementById('page-modal').classList.add('hidden');
+        }
+
+        function validatePageName(name) {
+            const data = getData();
+            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            const isDuplicate = data.pages.some(p => p.slug === slug);
+            const isValid = slug.length > 0;
+
+            const errorEl = document.getElementById('page-name-error');
+            const createBtn = document.getElementById('create-page-btn-modal');
+            
+            if (!isValid) {
+                errorEl.textContent = L10N[currentLang]['l10n-name-conflict'];
+                errorEl.classList.remove('hidden');
+                createBtn.disabled = true;
+            } else if (isDuplicate) {
+                errorEl.textContent = L10N[currentLang]['l10n-name-conflict'];
+                errorEl.classList.remove('hidden');
+                createBtn.disabled = true;
+            } else {
+                errorEl.classList.add('hidden');
+                createBtn.disabled = false;
+            }
+        }
+
+        function addPage() {
+            const name = document.getElementById('new-page-name').value.trim();
+            const description = document.getElementById('new-page-description').value.trim();
+
+            if (!name) return;
+
+            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            let data = getData();
+
+            if (data.pages.some(p => p.slug === slug)) {
+                // Should have been caught by validation, but double-check
+                alert(L10N[currentLang]['l10n-name-conflict']);
+                return;
+            }
+
+            const newPage = {
+                id: 'page-' + Date.now(),
+                name: name,
+                slug: slug,
+                description: description,
+                pageProfilePic: '', // New field for page profile image
+                design: {
+                    bgColor: '#f1f5f9', // slate-100
+                    bgImage: '', // New field for background image URL
+                    fontFamily: 'Inter'
+                },
+                links: []
+            };
+
+            data.pages.push(newPage);
+            saveData(data);
+            closePageModal();
+            renderDashboard();
+        }
+
+        function deletePage(pageId) {
+            if (!confirm(L10N[currentLang]['l10n-delete-page-confirm'])) return;
+            
+            let data = getData();
+            data.pages = data.pages.filter(p => p.id !== pageId);
+            saveData(data);
+            renderDashboard();
+        }
+
+        // ==================================================================================================
+        // 5. EDITOR LOGIC
+        // ==================================================================================================
+
+        function renderEditor(pageId) {
+            const data = getData();
+            const page = data.pages.find(p => p.id === pageId);
+            if (!page) {
+                window.location.hash = '#dashboard';
+                return;
+            }
+
+            // 1. Page Details
+            document.getElementById('editor-page-name').textContent = `${L10N[currentLang]['l10n-edit']} - ${page.name}`;
+            document.getElementById('editor-page-description').value = page.description;
+            
+            // 2. Page Profile Image Initialization
+            const defaultPagePic = 'https://placehold.co/64x64/CCCCCC/333333?text=Page';
+            document.getElementById('page-profile-url').value = page.pageProfilePic && !page.pageProfilePic.startsWith('data:image') ? page.pageProfilePic : '';
+            document.getElementById('page-profile-preview').src = page.pageProfilePic || defaultPagePic;
+
+            // 3. Design Tab Initialization
+            document.getElementById('design-bg-color').value = page.design.bgColor;
+            document.getElementById('design-bg-image').value = page.design.bgImage || '';
+            document.getElementById('design-font-family').value = page.design.fontFamily;
+
+            // 4. Link List Update
+            const linkListEl = document.getElementById('editor-link-list');
+            linkListEl.innerHTML = '';
+            
+            const isFreeTier = data.currentUser.tier === 'free';
+            const linkLimitReached = isFreeTier && page.links.length >= 10;
+            const linkLimitMessage = document.getElementById('link-limit-message') || document.createElement('p');
+            linkLimitMessage.id = 'link-limit-message';
+            linkLimitMessage.className = 'text-center text-red-500 font-medium p-2 bg-red-50 rounded-lg';
+            
+            if (linkLimitReached) {
+                linkLimitMessage.textContent = `${L10N[currentLang]['l10n-link-limit-reached']} (${page.links.length}/10)`;
+                linkListEl.insertAdjacentElement('beforebegin', linkLimitMessage);
+                document.querySelectorAll('#links-tab-content button').forEach(btn => btn.disabled = true);
+            } else {
+                 if (document.getElementById('link-limit-message')) document.getElementById('link-limit-message').remove();
+                 document.querySelectorAll('#links-tab-content button').forEach(btn => btn.disabled = false);
+            }
+
+            page.links.forEach(link => {
+                const linkItem = `
+                    <div class="bg-gray-50 p-3 rounded-lg flex items-center justify-between border-l-4 border-blue-500">
+                        <div>
+                            <p class="font-semibold text-gray-800">${link.description}</p>
+                            <p class="text-xs text-gray-500 truncate">${link.url}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="editLink('${page.id}', '${link.id}')" class="text-blue-500 hover:text-blue-700" title="Edit">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </button>
+                            <button onclick="deleteLink('${page.id}', '${link.id}')" class="text-red-500 hover:text-red-700" title="Delete">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                linkListEl.innerHTML += linkItem;
+            });
+            
+            // 5. Render Preview
+            renderPreview(page);
+            showEditorTab('links'); // Default tab
+        }
+
+        // 페이지 대표 이미지 URL 업데이트
+        function updatePageProfileUrl(url) {
+            let data = getData();
+            const pageIndex = data.pages.findIndex(p => p.id === currentPageId);
+            if (pageIndex !== -1) {
+                data.pages[pageIndex].pageProfilePic = url;
+                saveData(data);
+                document.getElementById('page-profile-preview').src = url || 'https://placehold.co/64x64/CCCCCC/333333?text=Page';
+                renderPreview(data.pages[pageIndex]);
+            }
+        }
+        
+        // 페이지 대표 이미지 파일 업로드
+        function uploadPageProfileImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const base64Image = e.target.result;
+                let data = getData();
+                const pageIndex = data.pages.findIndex(p => p.id === currentPageId);
+                if (pageIndex !== -1) {
+                    data.pages[pageIndex].pageProfilePic = base64Image;
+                    saveData(data);
+                    document.getElementById('page-profile-preview').src = base64Image;
+                    document.getElementById('page-profile-url').value = ''; // URL 필드 초기화
+                    renderPreview(data.pages[pageIndex]);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 링크 추가/수정 모달 열기
+        function showLinkModal(socialType = 'Custom', link = null) {
+            isEditingLink = !!link;
+            editingLinkId = link ? link.id : null;
+            document.getElementById('link-modal-title').textContent = isEditingLink ? '링크 수정' : `${socialType} 링크 추가`;
+
+            // Reset form
+            document.getElementById('link-url').value = link ? link.url : '';
+            document.getElementById('link-description').value = link ? link.description : (socialType !== 'Custom' ? socialType + ' Link' : '');
+            document.getElementById('link-image-url').value = link ? (link.customImageUrl || '') : '';
+            document.getElementById('link-image-file').value = '';
+            document.getElementById('link-preview-box').classList.add('hidden');
+
+            // Select style
+            const style = link ? link.style : 'bar';
+            selectLinkStyle(style);
+
+            document.getElementById('link-modal').classList.remove('hidden');
+        }
+
+        function closeLinkModal() {
+            document.getElementById('link-modal').classList.add('hidden');
+        }
+
+        function selectLinkStyle(style) {
+            document.getElementById('link-style').value = style;
+            document.querySelectorAll('.style-btn').forEach(btn => {
+                if (btn.getAttribute('data-style') === style) {
+                    btn.classList.replace('border-gray-300', 'border-blue-500');
+                    btn.classList.add('bg-blue-100', 'text-blue-600');
+                } else {
+                    btn.classList.replace('border-blue-500', 'border-gray-300');
+                    btn.classList.remove('bg-blue-100', 'text-blue-600');
+                }
+            });
+        }
+
+        function simulateLinkScraping(url) {
+            const previewBox = document.getElementById('link-preview-box');
+            const simImage = document.getElementById('sim-image');
+            const simTitle = document.getElementById('sim-title');
+            
+            previewBox.classList.add('hidden');
+
+            if (url.includes('youtube.com')) {
+                const videoIdMatch = url.match(/(?<=v=)[\w-]+/);
+                const title = videoIdMatch ? `YouTube Video Title (${videoIdMatch[0]})` : 'YouTube Channel Title';
+                const imageUrl = videoIdMatch ? `https://placehold.co/160x90/FF0000/FFFFFF?text=YT+Video` : 'https://placehold.co/64x64/FF0000/FFFFFF?text=YT';
+                
+                simImage.src = imageUrl;
+                simTitle.textContent = title;
+                previewBox.classList.remove('hidden');
+            } else if (url.includes('instagram.com')) {
+                 simImage.src = 'https://placehold.co/64x64/E4405F/FFFFFF?text=IG';
+                 simTitle.textContent = 'Instagram Profile/Post Title';
+                 previewBox.classList.remove('hidden');
+            } else {
+                simImage.src = 'https://placehold.co/64x64/cccccc/333333?text=WEB';
+                simTitle.textContent = 'Generic Web Link';
+            }
+        }
+
+        function saveLink() {
+            const url = document.getElementById('link-url').value.trim();
+            const description = document.getElementById('link-description').value.trim();
+            const style = document.getElementById('link-style').value;
+            let customImageUrl = document.getElementById('link-image-url').value.trim();
+            const imageFile = document.getElementById('link-image-file').files[0];
+
+            if (!url || !description) {
+                alert("URL과 설명을 입력해주세요.");
+                return;
+            }
+
+            let data = getData();
+            const page = data.pages.find(p => p.id === currentPageId);
+
+            if (!page) return;
+
+            // Handle image upload (simulate base64 conversion)
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    customImageUrl = e.target.result; // Base64 image
+                    finalizeLinkSave(data, page, url, description, style, customImageUrl);
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                finalizeLinkSave(data, page, url, description, style, customImageUrl);
+            }
+        }
+        
+        function finalizeLinkSave(data, page, url, description, style, customImageUrl) {
+            const newLink = {
+                id: isEditingLink ? editingLinkId : 'link-' + Date.now(),
+                url: url,
+                description: description,
+                style: style,
+                customImageUrl: customImageUrl || null
+            };
+
+            if (isEditingLink) {
+                page.links = page.links.map(l => l.id === newLink.id ? newLink : l);
+            } else {
+                // Tier limit check for free users
+                if (data.currentUser.tier === 'free' && page.links.length >= 10) {
+                    alert(L10N[currentLang]['l10n-link-limit-reached']);
+                    closeLinkModal();
+                    return;
+                }
+                page.links.push(newLink);
+            }
+            
+            // Save updated pages data back to main data structure
+            data.pages = data.pages.map(p => p.id === page.id ? page : p);
+            saveData(data);
+            
+            closeLinkModal();
+            renderEditor(currentPageId);
+        }
+
+        function editLink(pageId, linkId) {
+            const data = getData();
+            const page = data.pages.find(p => p.id === pageId);
+            const link = page?.links.find(l => l.id === linkId);
+            if (link) {
+                showLinkModal('Custom', link);
+            }
+        }
+
+        function deleteLink(pageId, linkId) {
+            if (!confirm(L10N[currentLang]['l10n-delete-link-confirm'])) return;
+
+            let data = getData();
+            const page = data.pages.find(p => p.id === pageId);
+            if (page) {
+                page.links = page.links.filter(l => l.id !== linkId);
+                data.pages = data.pages.map(p => p.id === page.id ? page : p);
+                saveData(data);
+                renderEditor(pageId);
+            }
+        }
+
+        function saveDescription() {
+            const newDesc = document.getElementById('editor-page-description').value.trim();
+            let data = getData();
+            const pageIndex = data.pages.findIndex(p => p.id === currentPageId);
+            if (pageIndex !== -1) {
+                data.pages[pageIndex].description = newDesc;
+                saveData(data);
+                renderPreview(data.pages[pageIndex]);
+            }
+        }
+        
+        function updatePageDesign() {
+            const bgColor = document.getElementById('design-bg-color').value;
+            const bgImage = document.getElementById('design-bg-image').value;
+            const fontFamily = document.getElementById('design-font-family').value;
+            
+            let data = getData();
+            const pageIndex = data.pages.findIndex(p => p.id === currentPageId);
+            if (pageIndex !== -1) {
+                data.pages[pageIndex].design.bgColor = bgColor;
+                data.pages[pageIndex].design.bgImage = bgImage; // 배경 이미지 URL 저장
+                data.pages[pageIndex].design.fontFamily = fontFamily;
+                saveData(data);
+                renderPreview(data.pages[pageIndex]);
+            }
+        }
+        
+        function showEditorTab(tab) {
+            document.getElementById('tab-links').classList.remove('border-blue-600', 'text-blue-600');
+            document.getElementById('tab-links').classList.add('border-transparent', 'text-gray-500');
+            document.getElementById('tab-design').classList.remove('border-blue-600', 'text-blue-600');
+            document.getElementById('tab-design').classList.add('border-transparent', 'text-gray-500');
+
+            document.getElementById('links-tab-content').classList.add('hidden');
+            document.getElementById('design-tab-content').classList.add('hidden');
+
+            document.getElementById(`tab-${tab}`).classList.add('border-blue-600', 'text-blue-600');
+            document.getElementById(`tab-${tab}`).classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById(`${tab}-tab-content`).classList.remove('hidden');
+        }
+
+        // ==================================================================================================
+        // 6. PUBLIC PAGE RENDER
+        // ==================================================================================================
+
+        // 에디터 미리보기 렌더링
+        function renderPreview(page) {
+            const previewEl = document.getElementById('public-page-preview');
+            // 배경 스타일 적용
+            previewEl.style.backgroundColor = page.design.bgColor;
+            previewEl.style.fontFamily = page.design.fontFamily;
+            previewEl.style.backgroundImage = page.design.bgImage ? `url('${page.design.bgImage}')` : 'none';
+            previewEl.innerHTML = renderPublicContent(page);
+        }
+
+        // 실제 공개 페이지 뷰 렌더링
+        function renderPublicView(slug = null) {
+            const data = getData();
+            const page = slug ? data.pages.find(p => p.slug === slug) : data.pages[0]; // For #public?slug=...
+
+            const container = document.getElementById('public-view-content');
+            if (!page) {
+                container.innerHTML = `<p class="text-center text-red-500 text-xl font-bold">페이지를 찾을 수 없습니다: ${slug}</p>`;
+                return;
+            }
+
+            // Apply design to the main body for the public view
+            document.getElementById('app-container').style.backgroundColor = page.design.bgColor;
+            document.getElementById('app-container').style.backgroundImage = page.design.bgImage ? `url('${page.design.bgImage}')` : 'none';
+            document.getElementById('app-container').classList.add('public-page-bg'); // 배경 이미지 스타일 클래스 추가
+
+            document.getElementById('public-view-content').style.fontFamily = page.design.fontFamily;
+            document.getElementById('public-view-content').style.backgroundColor = 'transparent'; // Use background color from body/app-container
+
+            container.innerHTML = renderPublicContent(page);
+        }
+
+        // 링크 콘텐츠 HTML 생성
+        function renderPublicContent(page) {
+            const data = getData(); // 데이터 로드
+            let linkHtml = '';
+            
+            const profileImageUrl = page.pageProfilePic || data.currentUser.profilePic;
+
+            page.links.forEach(link => {
+                const isVideo = link.url.includes('youtube.com');
+                const defaultImage = link.customImageUrl || (isVideo 
+                    ? `https://placehold.co/${link.style === 'wide' ? '300x170' : '100x100'}/FF0000/FFFFFF?text=YT`
+                    : `https://placehold.co/${link.style === 'square' ? '100x100' : '40x40'}/1e293b/FFFFFF?text=L`);
+                
+                let content = '';
+
+                switch (link.style) {
+                    case 'bar':
+                        content = `
+                            <a href="${link.url}" target="_blank" class="w-full p-3 bg-white hover:bg-gray-100 rounded-xl shadow-md transition duration-150 flex items-center space-x-3">
+                                <img src="${defaultImage}" class="w-10 h-10 object-cover rounded-lg flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/40x40/94a3b8/FFFFFF?text=L'" alt="Link Icon">
+                                <p class="text-gray-800 font-medium truncate">${link.description}</p>
+                            </a>
+                        `;
+                        break;
+                    case 'square':
+                        content = `
+                            <a href="${link.url}" target="_blank" class="w-full bg-white hover:bg-gray-100 rounded-xl shadow-md transition duration-150 block text-center">
+                                <div class="w-full aspect-square overflow-hidden rounded-t-xl">
+                                    <img src="${defaultImage}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/94a3b8/FFFFFF?text=SQUARE'" alt="Link Image">
+                                </div>
+                                <p class="p-3 text-gray-800 font-medium">${link.description}</p>
+                            </a>
+                        `;
+                        break;
+                    case 'wide':
+                        content = `
+                            <a href="${link.url}" target="_blank" class="w-full bg-white hover:bg-gray-100 rounded-xl shadow-md transition duration-150 block text-center">
+                                <div class="w-full aspect-[16/9] overflow-hidden rounded-t-xl">
+                                    <img src="${defaultImage}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x170/94a3b8/FFFFFF?text=WIDE'" alt="Link Image">
+                                </div>
+                                <p class="p-3 text-gray-800 font-medium">${link.description}</p>
+                            </a>
+                        `;
+                        break;
+                }
+                linkHtml += content;
+            });
+
+            return `
+                <div class="text-center mb-6 space-y-2">
+                    <img src="${profileImageUrl}" class="w-20 h-20 rounded-full mx-auto object-cover border-4 border-white shadow-lg" alt="Profile">
+                    <h1 class="text-3xl font-extrabold text-gray-900">${page.name}</h1>
+                    <p class="text-sm text-gray-600 whitespace-pre-wrap">${page.description}</p>
+                </div>
+                <div class="space-y-4">
+                    ${linkHtml}
+                </div>
+                <footer class="mt-8 text-center text-xs text-gray-400">
+                    Powered by Simple Link Manager (Simulation)
+                </footer>
+            `;
+        }
+
+        // ==================================================================================================
+        // 7. INITIALIZATION
+        // ==================================================================================================
+        
+        window.addEventListener('hashchange', route);
+        
+        window.onload = () => {
+            // Initial data check/setup
+            let data = getData();
+            if (!data.currentUser) {
+                // Set default mock user if no user exists for better testing experience
+                const defaultUser = {
+                    isLoggedIn: false,
+                    tier: 'free',
+                    name: 'Guest',
+                    email: 'guest@simplelink.com',
+                    social: '',
+                    profilePic: 'https://placehold.co/64x64/3B82F6/FFFFFF?text=G'
+                };
+                data.currentUser = defaultUser;
+                saveData(data);
+            }
+
+            // Set initial language from local storage or browser
+            let initialLang = data.currentUser.lang || (navigator.language.startsWith('ko') ? 'ko' : 'en');
+            setLanguage(initialLang);
+
+            // Start routing
+            route();
+        };
+
+    </script>
+</body>
+</html>
